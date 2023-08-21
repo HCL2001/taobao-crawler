@@ -54,13 +54,13 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const axiosInstance = axios.create({
-    baseURL: API_BASE_URL,
+  const config = {
     headers: {
-      'Access-Control-Allow-Origin': 'https://taobao-crawler.vercel.app',
-      'Content-Type': 'application/json', // You can adjust this header accordingly
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      // You can add other headers here if needed
     },
-  });
+  };
 
   // const mode = useSelector((state) => state.global.mode);
 
@@ -75,7 +75,7 @@ export default function Login() {
       const response = await axiosInstance.post(API_BASE_URL + "/login", {
         username,
         password,
-      });
+      }, config);
       console.log(response.data);
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
@@ -92,7 +92,7 @@ export default function Login() {
     try {
       const response = await axiosInstance.post(API_BASE_URL + "/expired/", {
         token: authToken,
-      });
+      }, config);
       if (response.data) {
         navigate("/dashboard");
       }
