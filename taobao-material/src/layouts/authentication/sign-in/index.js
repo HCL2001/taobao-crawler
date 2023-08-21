@@ -54,6 +54,14 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const axiosInstance = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://taobao-crawler.vercel.app',
+      'Content-Type': 'application/json', // You can adjust this header accordingly
+    },
+  });
+
   // const mode = useSelector((state) => state.global.mode);
 
   // const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
@@ -64,7 +72,7 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post(API_BASE_URL + "/login", {
+      const response = await axiosInstance.post(API_BASE_URL + "/login", {
         username,
         password,
       });
@@ -82,7 +90,7 @@ export default function Login() {
   };
   const checkToken = async () => {
     try {
-      const response = await axios.post(API_BASE_URL + "/expired/", {
+      const response = await axiosInstance.post(API_BASE_URL + "/expired/", {
         token: authToken,
       });
       if (response.data) {
