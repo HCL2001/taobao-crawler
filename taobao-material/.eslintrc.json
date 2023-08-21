@@ -11,8 +11,7 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["react"],
-  "rules": {
+   "rules": {
     "react/display-name": "off",
     "default-param-last": "off",
     "react/react-in-jsx-scope": "off",
