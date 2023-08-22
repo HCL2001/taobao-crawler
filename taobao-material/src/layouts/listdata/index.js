@@ -215,6 +215,16 @@ function ListData() {
             },
           }}
         >
+            <TextField
+                fullWidth
+                label="Search"
+                name="search"
+                // onChange={handleChange}
+                variant="outlined"
+                size="small"
+                style={{ width: 200, minWidth: 200, maxWidth: 800 }}
+                // onKeyDown={handleKeyDown}
+              />
           <Grid item xs={10} sm={8} md={6} lg={4}>
             {/* ... (Search bar and button) */}
           </Grid>
