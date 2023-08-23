@@ -1,8 +1,10 @@
-import { Typography, Divider, Paper, Container, Grid, Button } from "@mui/material";
+import { Typography, Divider, Paper, Container, Grid, IconButton, Modal} from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import React, { useEffect, useState } from "react";
 import { API_BASE_URL } from "assets/api/api";
 import ReactImageMagnify from 'react-image-magnify';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import axios from "axios";
 
@@ -12,9 +14,13 @@ const DetailPage = () => {
   const authToken = JSON.parse(JSON.stringify(localStorage.getItem("token")));
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [zoomedImageVisible, setZoomedImageVisible] = useState(false);
-  const [zoomedImageTop, setZoomedImageTop] = useState(0);
   const [selectedSku, setSelectedSku] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const toggleModal = () => {
+    setModalOpen(!modalOpen);
+  };
 
   const fetchProductInfo = async () => {
     try {
@@ -54,7 +60,6 @@ const DetailPage = () => {
     return <Typography>Loading...</Typography>;
   }
 
-  
   const mainImgs = productInfo && JSON.parse(productInfo.main_imgs);
   const originPrice = productInfo && productInfo.skus[0].origin_price;
   const salePrice = productInfo && productInfo.skus[0].sale_price;
@@ -76,17 +81,24 @@ const DetailPage = () => {
     }
   };
 
+  // Function to open image in a new window
+  const openImageInNewWindow = (imageUrl) => {
+    const newWindow = window.open(imageUrl, 'noopener,noreferrer');
+    if (newWindow) newWindow.opener = null;
+  };
+
   return (
     <DashboardLayout>
       <Container>
         <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={5}>
-            {mainImgs && mainImgs.length > 0 && (
+            {mainImgs && mainImgs.length > 0 && mainImgs[activeImageIndex] && (
               <div
                 style={{ position: 'relative' }}
                 onMouseEnter={() => setZoomedImageVisible(true)}
                 onMouseLeave={() => setZoomedImageVisible(false)}
+                onClick={() => toggleModal()} // Toggle the modal on image click
               >
                 <ReactImageMagnify
                   {...{
@@ -94,7 +106,7 @@ const DetailPage = () => {
                       alt: `Main Image ${activeImageIndex + 1}`,
                       width: 400,
                       src: mainImgs[activeImageIndex],
-                      height: 500
+                      height: 500,
                     },
                     largeImage: {
                       src: mainImgs[activeImageIndex],
@@ -198,6 +210,12 @@ const DetailPage = () => {
                     >
                       ¥{salePrice}
                     </Typography>
+                  </div>
+                  <div style={{ marginLeft: "auto" }}>
+                    {/* New paragraph */}
+                    <p style={{ fontSize: '18px', color: 'rgb(60, 60, 60)', fontWeight: 400 }}>
+                      {stock}+ in store
+                    </p>
                   </div>
                 </div>
                 <div className="product-quantity" style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
@@ -308,29 +326,62 @@ const DetailPage = () => {
           </Grid>
         </Paper>
       </Container>
+{/* Modal */}
+      <Modal
+        open={modalOpen}
+        onClose={toggleModal}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} // Center content
+      >
+        <div
+          style={{
+            display: 'flex',
+            background: 'white', // Set background color to white
+            borderRadius: '8px', // Add rounded corners
+            maxWidth: '80%', // Set maximum width
+            maxHeight: '80vh', // Set maximum height
+            overflow: 'auto', // Enable scrolling if content overflows
+          }}
+        >
+          {/* Left side with image */}
+          <div style={{ flex: 8, padding: '20px' }}>
+            {/* Display your main image */}
+            {mainImgs && mainImgs.length > 0 && (
+              <img
+                src={mainImgs[activeImageIndex]}
+                alt={`Main Image ${activeImageIndex + 1}`}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            )}
+          </div>
+          
+          {/* Right side with product name and list */}
+          <div style={{ flex: 2, padding: '20px', borderLeft: '1px solid #ccc', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <IconButton
+              onClick={toggleModal}
+              style={{ position: 'absolute', top: 10, right: 10 }}
+              aria-label="close"
+            >
+              <CloseIcon />
+            </IconButton>
+            <h2 style={{fontSize: '18px'}}>{productName}</h2>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'row', gap: '10px' }}>
+              {/* List of additional images */}
+              {mainImgs && mainImgs.length > 0 &&
+                mainImgs.map((img, index) => (
+                  <li
+                    key={index}
+                    onClick={() => setActiveImageIndex(index)} // Update the main image on click
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <img src={img} alt={`Additional Image ${index + 1}`} height={'50px'} />
+                  </li>
+                ))}
+            </ul>
+          </div>
+        </div>
+      </Modal>
     </DashboardLayout>
   );
 };
 
 export default DetailPage;
-
-// {productInfo && productInfo.skus && productInfo.skus.length > 0 && (
-//   <div>
-//     {productInfo.skus.map((sku, index) => (
-//       <Button key={index} onClick={() => handleShowSku(index)}>
-//         Show SKU {index + 1}
-//       </Button>
-//     ))}
-//   </div>
-// )}
-// {selectedSku && (
-//   <div>
-//     <Typography variant="body2" color="textSecondary">
-//       Origin Price: ¥{selectedSku.origin_price}
-//     </Typography>
-//     <Typography variant="body2" color="textSecondary">
-//       Sale Price: ¥{selectedSku.sale_price}
-//     </Typography>
-//     {/* Render other information as needed */}
-//   </div>
-// )}
